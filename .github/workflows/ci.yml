@@ -1,0 +1,27 @@
+name: Java CI med Maven
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Klona koden
+        uses: actions/checkout@v4
+
+      - name: Installera JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Bygg projektet med Maven
+        run: mvn clean install
+
+      - name: Kör tester
+        run: mvn test
