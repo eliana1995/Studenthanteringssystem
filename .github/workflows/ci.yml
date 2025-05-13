@@ -2,13 +2,25 @@ name: Java CI med Maven
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: student_db
+          MYSQL_USER: root
+          MYSQL_PASSWORD: 1122334455
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping --silent" --health-timeout=5s --health-start-period=10s --health-retries=3
 
     steps:
       - name: Klona koden
@@ -21,7 +33,14 @@ jobs:
           java-version: '17'
 
       - name: Bygg projektet med Maven
-        run: mvn clean install
+        run: mvn clean install -DskipTests
+
+      - name: Vänta tills MySQL är redo
+        run: |
+          while ! mysqladmin ping -h "localhost" --silent; do
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
 
       - name: Kör tester
         run: mvn test
